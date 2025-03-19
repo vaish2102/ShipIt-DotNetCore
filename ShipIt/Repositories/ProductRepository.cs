@@ -14,6 +14,7 @@ namespace ShipIt.Repositories
         ProductDataModel GetProductByGtin(string gtin);
         IEnumerable<ProductDataModel> GetProductsByGtin(List<string> gtins);
         ProductDataModel GetProductById(int id);
+        Dictionary<int, ProductDataModel> GetAllProducts();
         void AddProducts(IEnumerable<ProductDataModel> products);
         void DiscontinueProductByGtin(string gtin);
     }
@@ -50,6 +51,15 @@ namespace ShipIt.Repositories
             var parameter = new NpgsqlParameter("@p_id", id);
             string noProductWithIdErrorMessage = string.Format("No products found with id of value {0}", id.ToString());
             return RunSingleGetQuery(sql, reader => new ProductDataModel(reader), noProductWithIdErrorMessage, parameter);
+        }
+
+        public Dictionary<int, ProductDataModel> GetAllProducts()
+        {
+
+            string sql = "SELECT p_id, gtin_cd, gcp_cd, gtin_nm, m_g, l_th, ds, min_qt FROM gtin";
+            string noProductWithIdErrorMessage = string.Format("No products found in the database");
+            return base.RunGetQuery(sql,reader => new ProductDataModel(reader),noProductWithIdErrorMessage,null).ToDictionary(p => p.Id, p => p);
+            // return RunSingleGetQuery(sql, reader => new ProductDataModel(reader), noProductWithIdErrorMessage, parameter);
         }
 
         public void DiscontinueProductByGtin(string gtin)

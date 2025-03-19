@@ -31,20 +31,24 @@ namespace ShipIt.Controllers
         public InboundOrderResponse Get([FromRoute] int warehouseId)
         {
             Log.Info("orderIn for warehouseId: " + warehouseId);
-
+            
             var operationsManager = new Employee(_employeeRepository.GetOperationsManager(warehouseId));
 
             Log.Debug(String.Format("Found operations manager: {0}", operationsManager));
-
+            
             var allStock = _stockRepository.GetStockByWarehouseId(warehouseId);
 
             Dictionary<Company, List<InboundOrderLine>> orderlinesByCompany = new Dictionary<Company, List<InboundOrderLine>>();
+
+            Dictionary<int, ProductDataModel> products = _productRepository.GetAllProducts();
+            Dictionary<string, CompanyDataModel> companies = _companyRepository.GetAllCompanies();
+
             foreach (var stock in allStock)
             {
-                Product product = new Product(_productRepository.GetProductById(stock.ProductId));
+                Product product = new Product(products[stock.ProductId]);
                 if(stock.held < product.LowerThreshold && !product.Discontinued)
                 {
-                    Company company = new Company(_companyRepository.GetCompany(product.Gcp));
+                    Company company = new Company(companies[product.Gcp]);
 
                     var orderQuantity = Math.Max(product.LowerThreshold * 3 - stock.held, product.MinimumOrderQuantity);
 
