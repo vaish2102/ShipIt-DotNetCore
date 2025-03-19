@@ -23,7 +23,7 @@ namespace ShipIt.Controllers
         }
 
         [HttpPost("")]
-        public void Post([FromBody] OutboundOrderRequestModel request)
+        public OutboundOrderResponse Post([FromBody] OutboundOrderRequestModel request)
         {
             Log.Info(String.Format("Processing outbound order: {0}", request));
 
@@ -93,7 +93,21 @@ namespace ShipIt.Controllers
                 throw new InsufficientStockException(string.Join("; ", errors));
             }
 
+            float totalWeight = 0;
+            foreach (var item in products.Values)
+            {
+                StockAlteration lineItem = lineItems.FirstOrDefault(lineItem => lineItem.ProductId == item.Id);
+
+                if (lineItem != null) {
+                    int quantity = lineItem.Quantity;
+                    totalWeight += item.Weight * quantity;
+                }
+            }
+
+            int numberOfTrucks = Convert.ToInt32(Math.Ceiling(totalWeight / 2000));
             _stockRepository.RemoveStock(request.WarehouseId, lineItems);
+
+            return new OutboundOrderResponse(numberOfTrucks);
         }
     }
 }
