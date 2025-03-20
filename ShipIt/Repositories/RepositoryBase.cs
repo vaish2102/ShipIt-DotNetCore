@@ -15,7 +15,7 @@ namespace ShipIt.Repositories
         {
             get { return new NpgsqlConnection(ConnectionHelper.GetConnectionString()); }
         }
-
+   
         protected long QueryForLong(string sqlString)
         {
             using (IDbConnection connection = Connection)
