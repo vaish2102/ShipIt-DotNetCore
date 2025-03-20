@@ -56,7 +56,6 @@ namespace ShipIt.Repositories
                 var companyDataModel = new CompanyDataModel(company);
                 parametersList.Add(companyDataModel.GetNpgsqlParameters().ToArray());
             }
-
             base.RunTransaction(sql, parametersList);
         }
     }

@@ -59,7 +59,6 @@ namespace ShipIt.Repositories
             string sql = "SELECT p_id, gtin_cd, gcp_cd, gtin_nm, m_g, l_th, ds, min_qt FROM gtin";
             string noProductWithIdErrorMessage = string.Format("No products found in the database");
             return base.RunGetQuery(sql,reader => new ProductDataModel(reader),noProductWithIdErrorMessage,null).ToDictionary(p => p.Id, p => p);
-            // return RunSingleGetQuery(sql, reader => new ProductDataModel(reader), noProductWithIdErrorMessage, parameter);
         }
 
         public void DiscontinueProductByGtin(string gtin)
@@ -68,14 +67,12 @@ namespace ShipIt.Repositories
             var parameter = new NpgsqlParameter("@gtin_cd", gtin);
             string noProductWithGtinErrorMessage =
                 string.Format("No products found with gtin of value {0}", gtin.ToString());
-
             RunSingleQuery(sql, noProductWithGtinErrorMessage, parameter);
         }
 
         public void AddProducts(IEnumerable<ProductDataModel> products)
         {
             string sql = "INSERT INTO gtin (gtin_cd, gcp_cd, gtin_nm, m_g, l_th, ds, min_qt) VALUES (@gtin_cd, @gcp_cd, @gtin_nm, @m_g, @l_th, @ds, @min_qt)";
-
             var parametersList = new List<NpgsqlParameter[]>();
             var gtins = new List<string>();
 
