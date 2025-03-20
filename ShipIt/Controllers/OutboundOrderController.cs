@@ -64,7 +64,6 @@ namespace ShipIt.Controllers
             }
 
             var stock = _stockRepository.GetStockByWarehouseAndProductIds(request.WarehouseId, productIds);
-
             var orderLines = request.OrderLines.ToList();
             errors = new List<string>();
 
@@ -93,20 +92,9 @@ namespace ShipIt.Controllers
                 throw new InsufficientStockException(string.Join("; ", errors));
             }
 
-            float totalWeight = 0;
-            foreach (var item in products.Values)
-            {
-                StockAlteration lineItem = lineItems.FirstOrDefault(lineItem => lineItem.ProductId == item.Id);
-
-                if (lineItem != null) {
-                    int quantity = lineItem.Quantity;
-                    totalWeight += item.Weight * quantity;
-                }
-            }
-
+            float totalWeight = request.OrderLines.Select(line => line.quantity*products[line.gtin].Weight).Sum();
             int numberOfTrucks = Convert.ToInt32(Math.Ceiling(totalWeight / 2000));
             _stockRepository.RemoveStock(request.WarehouseId, lineItems);
-
             return new OutboundOrderResponse(numberOfTrucks);
         }
     }
